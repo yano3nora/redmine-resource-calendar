@@ -1,0 +1,40 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;      // Important!
+}
+
+html {
+  height: 100%;                // Important!
+
+  body   {
+    display: flex;             // Important!
+    flex-direction: column;    // Important!
+    height: 100%;              // Important!
+    position: relative;
+
+    header {
+      width: 100%;
+      padding: 1rem;
+      color: white;
+      background-color: #343a40;  // Adjustment of style
+    }
+
+    main   {
+      flex-shrink: 0;        // Important!
+      padding-bottom: 3rem;  // Adjustment of style
+      padding-top: 1rem;     // Adjustment of style
+      position: relative;
+    }
+
+    footer {
+      background-color: #f8f9fa;      // Adjustment of style
+      border-top: 1px solid #dee2e6;  // Adjustment of style
+      margin-top: auto;               // Important!
+      padding-bottom: 1rem;           // Adjustment of style
+      padding-top: 1rem;              // Adjustment of style
+      text-align: center;
+      font-size: 0.8rem;
+    }
+  }
+}

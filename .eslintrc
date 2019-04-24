@@ -1,0 +1,37 @@
+{
+  "extends": ["standard", "standard-react"],
+  "parser": "babel-eslint",
+  "settings": {
+    "import/resolver": "webpack"
+  },
+  "rules": {
+    "indent": ["error", 2, {
+        "MemberExpression": "off",
+        "SwitchCase": 1,
+    }],
+    "comma-dangle": "off",
+    "key-spacing": "off",
+    "no-alert": "off",
+    "no-confirm": "off",
+    "no-console": "off",
+    "no-extra-parens": "off",
+    "no-multi-spaces": "off",
+    "no-prompt": "off",
+    "no-prototype-builtins": "off",
+    "no-restricted-globals": "off",
+    "no-undef": "off",
+    "jsx-quotes": "off",
+    "no-unused-vars": "warn",
+    "react/button-has-type": "off",
+    "react/destructuring-assignment": "off",
+    "react/jsx-filename-extension": "off",
+    "react/jsx-one-expression-per-line": "off",
+    "react/no-danger": "off",
+    "react/no-render-return-value": "off",
+    "react/no-unused-prop-types": "warn",
+    "react/prefer-stateless-function": "off",
+    "react/react-in-jsx-scope": "off",
+    "react/self-closing-comp": "off",
+    "react/sort-comp": "off",
+  }
+}
