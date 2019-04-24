@@ -8,32 +8,104 @@ import PropTypes from 'prop-types'
  * @see    https://github.com/yano3nora/redmine-resource-calendar
  */
 export default class RedmineResourceCalendar extends Component {
-  // Initialize.
   constructor (props) {
     super(props)
     this.state = {
       year: moment().year(),
       month: moment().month() + 1,
-      users: this.props.users,
       weeks: [],
-      tickets: [],
     }
-    this.reload         = this.reload.bind(this)
+    this.setWeeks       = this.setWeeks.bind(this)
     this.yearSelectRef  = React.createRef()
     this.monthSelectRef = React.createRef()
   }
 
-  reload () {
-    const selectedYear  = this.yearSelectRef.current.value
-    const selectedMonth = this.monthSelectRef.current.value
-    this.setState((prevState, props) => {
-    })
+  componentDidMount () {
+    this.setWeeks()
   }
 
-  // Life cycle events.
-  componentDidMount () {
-    // コンポーネントのマウント直後イベント
-    // Ajax など非同期処理で初期データを state に突っ込む用
+  componentDidUpdate () {
+    console.log(this.state)  // Debug.
+  }
+
+  setWeeks () {
+    const newWeeks           = []
+    const selectedYear       = this.yearSelectRef.current.value
+    const selectedMonth      = this.monthSelectRef.current.value
+    const firstDayOfMonth    = moment(`${selectedYear}-${selectedMonth}-01`, 'YYYY-MM-DD')
+    const firstDayOfCalendar = firstDayOfMonth.add(-firstDayOfMonth.day(), 'days')
+    for (let i = 0; i < 6; i++) {
+      let adding = 7 * i
+      let start  = moment(firstDayOfCalendar.format('YYYY-MM-DD'), 'YYYY-MM-DD').add(adding, 'days')
+      newWeeks.push({
+        no: start.week(),
+        start: start,
+        end: moment(start.format('YYYY-MM-DD'), 'YYYY-MM-DD').add(6, 'days'),
+        issues: [],
+      })
+    }
+    ;(async () => {
+      for (let week of newWeeks) {
+        for (let user of this.props.users) {
+          await this.fetchIssuesIntoWeek(week, user.id)
+        }
+      }
+      this.setState((prevState, props) => {
+        return {
+          weeks: newWeeks,
+          year:  selectedYear,
+          month: selectedMonth,
+        }
+      })
+    })()
+  }
+
+  fetchIssuesIntoWeek (week, userId) {
+    const query = `key=${this.props.apiKey}`
+                  + `&status_id!=closed`
+                  + `&start_date=<=${week.end.format('YYYY-MM-DD')}`
+                  + `&assigned_to_id=${userId}`
+                  + `&due_date=>=${week.start.format('YYYY-MM-DD')}`
+                  + `&limit=100`
+    return fetch(`${this.props.url}/issues.json?${query}`).then((response) => response.json())
+      .then((json) => {
+        json.issues.forEach((issue) => {
+          const issueStartDate     = moment(issue.start_date, 'YYYY-MM-DD')
+          const issueDueDate       = moment(issue.due_date, 'YYYY-MM-DD')
+          const dateDiffOfThisWeek = issueDueDate.diff(week.start, 'days')
+          let remainingWorkingDays = dateDiffOfThisWeek
+          if (issueStartDate.diff(week.start, 'days') === 0 || (issueStartDate.isAfter(week.start) && issueStartDate.isBefore(week.end))) {
+            remainingWorkingDays = issueDueDate.diff(issueStartDate, 'days') + 1
+          }
+          if (remainingWorkingDays >= 7) {
+            remainingWorkingDays = remainingWorkingDays - (Math.floor(remainingWorkingDays / 7) * 2)
+          }
+          let estimatedHours = issue.estimated_hours || null
+          if (!estimatedHours) {
+            estimatedHours = this.props.workload * remainingWorkingDays
+          }
+          let issueDateNumber = issueDueDate.diff(issueStartDate, 'days') + 1
+          if (issueDateNumber >= 7) {
+            issueDateNumber = issueDateNumber - (Math.floor(issueDateNumber / 7) * 2)
+          }
+          let workloadPerWorkingDays = estimatedHours /  issueDateNumber
+          let workloadPerThisWeek    = workloadPerWorkingDays * 5
+          if (issueDueDate.isBefore(week.end)) {
+            workloadPerThisWeek = workloadPerWorkingDays * remainingWorkingDays
+          }
+          issue.workload = Math.round(workloadPerThisWeek * 10) / 10
+          issue.remaining_working_days    = remainingWorkingDays
+          issue.workload_per_working_days = workloadPerWorkingDays
+        })
+        week.issues.push({
+          user: userId,
+          tickets: json.issues,
+        })
+      })
+      .catch((error) => {
+        alert(error.message)
+        console.error(error)
+      })
   }
 
   // Render method on mount.
@@ -54,15 +126,40 @@ export default class RedmineResourceCalendar extends Component {
           <select ref={this.monthSelectRef} defaultValue={this.state.month}>
             {months.map((month) => <option key={month} value={month}>{month}</option>)}
           </select>
-          <button onClick={this.reload}>Reload</button>
+          <button onClick={this.setWeeks}>Reload</button>
         </div>
+        <hr />
         <table className="redmine-resource-calendar__content__table">
-          <thead></thead>
+          <thead>
+            <tr>
+              <th>weeks</th>
+              {this.props.users.map((user) => <th key={user.id}>{user.name}</th>)}
+            </tr>
+          </thead>
           <tbody>
             {this.state.weeks.map((week) => {
               return (
-                <tr key={week}>
-                  
+                <tr key={week.no}>
+                  <td>
+                    {week.start.format('M/D')}
+                    -
+                    {week.end.format('D')}
+                  </td>
+                  {week.issues.map((issue) => {
+                    return (
+                      <td key={issue.user}>
+                        {
+                          Math.round((issue.tickets.reduce((a, b) => a + b.workload, 0)) / (this.props.workload * 5) * 100)
+                        }
+                        %&nbsp;
+                        <small>
+                          {issue.tickets.reduce((a, b) => a + b.workload, 0)}
+                          /
+                          {this.props.workload * 5} h
+                        </small>
+                      </td>
+                    )
+                  })}
                 </tr>
               )
             })}
@@ -75,7 +172,7 @@ export default class RedmineResourceCalendar extends Component {
 
 // PropTypes validation.
 RedmineResourceCalendar.propTypes = {
-  users:    PropTypes.arrayOf(PropTypes.string).isRequired,
+  users:    PropTypes.arrayOf(PropTypes.object).isRequired,
   url:      PropTypes.string.isRequired,
   apiKey:   PropTypes.string.isRequired,
   workload: PropTypes.number.isRequired,

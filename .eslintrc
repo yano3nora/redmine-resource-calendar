@@ -20,6 +20,7 @@
     "no-prototype-builtins": "off",
     "no-restricted-globals": "off",
     "no-undef": "off",
+    "operator-linebreak": "off",
     "jsx-quotes": "off",
     "no-unused-vars": "warn",
     "react/button-has-type": "off",
