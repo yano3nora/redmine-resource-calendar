@@ -12,7 +12,141 @@
     box-sizing: border-box;
   }
 
-  select {
-    color: green;
+  table {
+    border-collapse: collapse;
+  }
+
+  th {
+    background: #ccc;
+  }
+
+  th,
+  td {
+    border: 1px solid #ccc;
+    padding: 8px;
+  }
+
+  tr:nth-child(even) {
+    background: #efefef;
+  }
+
+  tr:hover {
+    background: #d1d1d1;
+  }
+
+  .redmine-resource-calendar-table {
+    width: 100%;
+  }
+
+  .redmine-resource-calendar-week-field {
+    width: 100px;
+    text-align: center;
+  }
+
+  .redmine-resource-calendar-user-field {
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+    height: 100px;
+  }
+
+  .redmine-resource-calendar-resources {
+    flex: 0 1 65%;
+  }
+
+  .redmine-resource-calendar-tickets {
+    flex: 0 1 35%;
+    display: flex;
+    align-items: center;
+    align-content: center;
+    flex-direction: column;
+    flex-wrap: wrap;
+    justify-content: center;
+    font-size: 12px;
+    border-left: 1px dotted #aaa;
+
+    a {
+      display: block;
+      margin: 3px;
+    }
+  }
+
+  .redmine-resource-calendar-plans {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px dotted transparent;
+    padding-top: 6px;
+    padding-left: 5px;
+    padding-right: 5px;
+    height: 50px;
+
+    &::before {
+      content: 'Plans';
+      display: block;
+      flex: 0 1 20%;
+      font-size: .9em;
+      color: #666;
+      font-weight: bold;
+    }
+  }
+
+  .redmine-resource-calendar-acts {
+    display: flex;
+    justify-content: space-between;
+    border-top: 1px dotted #aaa;
+    padding-top: 10px;
+    padding-left: 5px;
+    padding-right: 5px;
+    height: 50px;
+
+    &::before {
+      content: 'Acts';
+      flex: 0 1 20%;
+      font-size: .9em;
+      color: #666;
+      font-weight: bold;
+    }
+  }
+
+  .redmine-resource-calendar-percent {
+    flex: 0 1 50%;
+    display: block;
+    text-align: right;
+    padding-right: 3%;
+    font-size: 1.5em;
+    font-weight: bold;
+    color: #555;
+
+    &::after {
+      content: '%';
+      font-size: 12px;
+    }
+  }
+
+  .redmine-resource-calendar-hours {
+    flex: 0 1 30%;
+    display: block;
+    text-align: right;
+    align-self: flex-end;
+    margin-bottom: 8px;
+    padding-right: 3%;
+    color: #666;
+
+    &::after {
+      content: 'h';
+      font-size: 12px;
+    }
+  }
+
+  .redmine-resource-calendar--low {
+    background: rgba(10, 158, 150, .2);
+  }
+
+  .redmine-resource-calendar--middle {
+    background: rgba(242, 198, 10, .2);
+  }
+
+  .redmine-resource-calendar--high {
+    background: rgba(158, 10, 8, .2);
   }
 }

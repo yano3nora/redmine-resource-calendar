@@ -70,6 +70,7 @@ export default class RedmineResourceCalendar extends Component {
                           + `&start_date=<=${week.end.format('YYYY-MM-DD')}`
                           + `&assigned_to_id=${userId}`
                           + `&due_date=>=${week.start.format('YYYY-MM-DD')}`
+                          + `&status_id=*`
                           + `&limit=100`
     const queryForSpents = `key=${this.props.apiKey}`
                           + `&from=${week.start.format('YYYY-MM-DD')}`
@@ -103,7 +104,6 @@ export default class RedmineResourceCalendar extends Component {
           if (issueDueDate.isBefore(week.end)) {
             workloadPerThisWeek = workloadPerWorkingDays * remainingWorkingDays
           }
-          issue.is_wip   = true
           issue.workload = Math.round(workloadPerThisWeek * 10) / 10
         })
         week.users.push({
@@ -145,7 +145,7 @@ export default class RedmineResourceCalendar extends Component {
     const months = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
     return (
       <div className="redmine-resource-calendar__content">
-        <div className="redmine-resource-calendar__content__form">
+        <div className="redmine-resource-calendar-form">
           {(() => {
             return (
               <select ref={this.yearSelectRef} defaultValue={this.state.year}>
@@ -161,7 +161,7 @@ export default class RedmineResourceCalendar extends Component {
           <button onClick={this.setWeeks}>Reload</button>
         </div>
         <hr />
-        <table className="redmine-resource-calendar__content__table">
+        <table className="redmine-resource-calendar-table">
           <thead>
             <tr>
               <th>weeks</th>
@@ -172,7 +172,7 @@ export default class RedmineResourceCalendar extends Component {
             {this.state.weeks.map((week) => {
               return (
                 <tr key={week.no}>
-                  <td>
+                  <td className="redmine-resource-calendar-week-field">
                     {week.start.format('M/D')}
                     -
                     {week.end.format('D')}
@@ -180,30 +180,36 @@ export default class RedmineResourceCalendar extends Component {
                   {week.users.map((user) => {
                     return (
                       <td key={user.userId}>
-                        <div className="redmine-resource-calendar-plans">
-                          {
-                            Math.round((user.issues.reduce((a, b) => a + b.workload, 0)) / (this.props.workload * 5) * 100)
-                          }
-                          %&nbsp;
-                          <small>
-                            {user.issues.reduce((a, b) => a + b.workload, 0)}
-                            /
-                            {this.props.workload * 5} h
-                          </small>
-                        </div>
-                        <div className="redmine-resource-calendar-acts">
-                          {
-                            Math.round((user.spents.reduce((a, b) => a + b.hours, 0)) / (this.props.workload * 5) * 100)
-                          }
-                          %&nbsp;
-                          <small>
-                            {user.spents.reduce((a, b) => a + b.hours, 0)}
-                            /
-                            {this.props.workload * 5} h
-                          </small>
-                        </div>
-                        <div className="redmine-resource-calendar-tickets">
-                          {user.tickets.map((ticket) => <a key={ticket} href={`${this.props.url}/issues/${ticket}`}>#{ticket}</a>)}
+                        <div className="redmine-resource-calendar-user-field">
+                          <div className="redmine-resource-calendar-resources">
+                            <div className="redmine-resource-calendar-plans">
+                              <span className="redmine-resource-calendar-percent">
+                                {
+                                  Math.round((user.issues.reduce((a, b) => a + b.workload, 0)) / (this.props.workload * 5) * 100)
+                                }
+                              </span>
+                              <small className="redmine-resource-calendar-hours">
+                                {Math.round(user.issues.reduce((a, b) => a + b.workload, 0) * 10) / 10}
+                                /
+                                {this.props.workload * 5}
+                              </small>
+                            </div>
+                            <div className="redmine-resource-calendar-acts">
+                              <span className="redmine-resource-calendar-percent">
+                                {
+                                  Math.round((user.spents.reduce((a, b) => a + b.hours, 0)) / (this.props.workload * 5) * 100)
+                                }
+                              </span>
+                              <small className="redmine-resource-calendar-hours">
+                                {Math.round(user.spents.reduce((a, b) => a + b.hours, 0) * 10) / 10}
+                                /
+                                {this.props.workload * 5}
+                              </small>
+                            </div>
+                          </div>
+                          <div className="redmine-resource-calendar-tickets">
+                            {user.tickets.map((ticket) => <a key={ticket} target="_blank" href={`${this.props.url}/issues/${ticket}`}>#{ticket}<br /></a>)}
+                          </div>
                         </div>
                       </td>
                     )
