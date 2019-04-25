@@ -4,27 +4,15 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>Sample | redmine-resource-calendar</title>
-    <link rel="stylesheet" type="text/css" href="/bundle.css">
-    <script src="/bundle.js" defer></script>
+    <link rel="stylesheet" type="text/css" href="/redmine-resource-calendar.css">
+    <script src="/redmine-resource-calendar.js" defer></script>
   </head>
-  <body>
-    <header>
-      redmine-resource-calendar
-    </header>
-    <main>
-      <article>
-        <div id="redmine-resource-calendar"
-          data-users='<%= process.env.USERS %>'
-          data-url="<%= process.env.URL %>"
-          data-api-key="<%= process.env.API_KEY %>"
-          data-workload="<%= process.env.WORKLOAD %>"
-        ></div>
-      </article>
-    </main>
-    <footer>
-      &copy; 2019 <a href="https://github.com/yano3nora/redmine-resource-calendar" target="_blank">
-        yano3nora/redmine-resource-calendar
-      </a>
-    </footer>
+  <body style="padding: 2rem;">
+    <div id="redmine-resource-calendar"
+      data-users='<%= process.env.USERS %>'
+      data-url="<%= process.env.URL %>"
+      data-api-key="<%= process.env.API_KEY %>"
+      data-workload="<%= process.env.WORKLOAD %>"
+    ></div>
   </body>
 </html>

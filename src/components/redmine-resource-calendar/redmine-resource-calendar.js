@@ -46,7 +46,7 @@ export default class RedmineResourceCalendar extends Component {
         no: start.week(),
         start: start,
         end: moment(start.format('YYYY-MM-DD'), 'YYYY-MM-DD').add(6, 'days'),
-        issues: [],
+        users: [],
       })
     }
     ;(async () => {
@@ -66,13 +66,18 @@ export default class RedmineResourceCalendar extends Component {
   }
 
   fetchIssuesIntoWeek (week, userId) {
-    const query = `key=${this.props.apiKey}`
-                  + `&status_id!=closed`
-                  + `&start_date=<=${week.end.format('YYYY-MM-DD')}`
-                  + `&assigned_to_id=${userId}`
-                  + `&due_date=>=${week.start.format('YYYY-MM-DD')}`
-                  + `&limit=100`
-    return fetch(`${this.props.url}/issues.json?${query}`).then((response) => response.json())
+    const queryForIssues = `key=${this.props.apiKey}`
+                          + `&start_date=<=${week.end.format('YYYY-MM-DD')}`
+                          + `&assigned_to_id=${userId}`
+                          + `&due_date=>=${week.start.format('YYYY-MM-DD')}`
+                          + `&limit=100`
+    const queryForSpents = `key=${this.props.apiKey}`
+                          + `&from=${week.start.format('YYYY-MM-DD')}`
+                          + `&to=${week.end.format('YYYY-MM-DD')}`
+                          + `&user_id=${userId}`
+                          + `&limit=100`
+    return fetch(`${this.props.url}/issues.json?${queryForIssues}`)
+      .then((response) => response.json())
       .then((json) => {
         json.issues.forEach((issue) => {
           const issueStartDate     = moment(issue.start_date, 'YYYY-MM-DD')
@@ -98,17 +103,39 @@ export default class RedmineResourceCalendar extends Component {
           if (issueDueDate.isBefore(week.end)) {
             workloadPerThisWeek = workloadPerWorkingDays * remainingWorkingDays
           }
+          issue.is_wip   = true
           issue.workload = Math.round(workloadPerThisWeek * 10) / 10
-          issue.remaining_working_days    = remainingWorkingDays
-          issue.workload_per_working_days = workloadPerWorkingDays
         })
-        week.issues.push({
-          user: userId,
-          tickets: json.issues,
+        week.users.push({
+          userId: userId,
+          issues: json.issues,
+          spents: [],
+          tickets: [],
         })
       })
+      .then(() => fetch(`${this.props.url}/time_entries.json?${queryForSpents}`))
+      .then((response) => response.json())
+      .then((json) => {
+        for (let i = 0; i < week.users.length; i++) {
+          if (week.users[i].userId !== userId) continue
+          week.users[i].spents.push(...json.time_entries)
+        }
+      })
+      .then(() => {
+        for (let j = 0; j < week.users.length; j++) {
+          week.users[j].issues.forEach((issue) => {
+            if (!week.users[j].tickets.includes(issue.id)) {
+              week.users[j].tickets.push(issue.id)
+            }
+          })
+          week.users[j].spents.forEach((spent) => {
+            if (!week.users[j].tickets.includes(spent.issue.id)) {
+              week.users[j].tickets.push(spent.issue.id)
+            }
+          })
+        }
+      })
       .catch((error) => {
-        alert(error.message)
         console.error(error)
       })
   }
@@ -150,18 +177,34 @@ export default class RedmineResourceCalendar extends Component {
                     -
                     {week.end.format('D')}
                   </td>
-                  {week.issues.map((issue) => {
+                  {week.users.map((user) => {
                     return (
-                      <td key={issue.user}>
-                        {
-                          Math.round((issue.tickets.reduce((a, b) => a + b.workload, 0)) / (this.props.workload * 5) * 100)
-                        }
-                        %&nbsp;
-                        <small>
-                          {issue.tickets.reduce((a, b) => a + b.workload, 0)}
-                          /
-                          {this.props.workload * 5} h
-                        </small>
+                      <td key={user.userId}>
+                        <div className="redmine-resource-calendar-plans">
+                          {
+                            Math.round((user.issues.reduce((a, b) => a + b.workload, 0)) / (this.props.workload * 5) * 100)
+                          }
+                          %&nbsp;
+                          <small>
+                            {user.issues.reduce((a, b) => a + b.workload, 0)}
+                            /
+                            {this.props.workload * 5} h
+                          </small>
+                        </div>
+                        <div className="redmine-resource-calendar-acts">
+                          {
+                            Math.round((user.spents.reduce((a, b) => a + b.hours, 0)) / (this.props.workload * 5) * 100)
+                          }
+                          %&nbsp;
+                          <small>
+                            {user.spents.reduce((a, b) => a + b.hours, 0)}
+                            /
+                            {this.props.workload * 5} h
+                          </small>
+                        </div>
+                        <div className="redmine-resource-calendar-tickets">
+                          {user.tickets.map((ticket) => <a key={ticket} href={`${this.props.url}/issues/${ticket}`}>#{ticket}</a>)}
+                        </div>
                       </td>
                     )
                   })}

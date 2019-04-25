@@ -25,7 +25,8 @@ function generateHtmlPlugins (templateDir) {
     const extension = parts[1]
     return new HtmlWebpackPlugin({
       filename: `${name}.html`,
-      template: path.resolve(__dirname, `${templateDir}/${name}.${extension}`)
+      template: path.resolve(__dirname, `${templateDir}/${name}.${extension}`),
+      inject: false,
     })
   })
 }
@@ -51,7 +52,7 @@ module.exports = {
   },
   output: {
     path: path.join(__dirname, 'dist/'),
-    filename: '[name].js',
+    filename: 'redmine-resource-calendar.js',
   },
   resolve: {
     alias: {
@@ -154,7 +155,7 @@ module.exports = {
       }
     }),
     new MiniCssExtractPlugin({
-      filename: './bundle.css',
+      filename: './redmine-resource-calendar.css',
     }),
     new webpack.ProvidePlugin({
       moment: 'moment',
@@ -175,17 +176,19 @@ module.exports = {
         index: 'index.html',
       },
       cors: true,
-      reloadDelay: 500,  // edit
+      reloadDelay: 0,  // edit
       injectChanges: true,
+      injectCss: true,
+      open: false,
       watchOptions: {
         awaitWriteFinish : true,
         ignoreInitial: true,
         ignored: ['/node_modules/'],  // edit
       },
       files: [  // edit
-        'dist/*.html',
+        'src/**/*.ejs',
         'src/**/*.js',
-        'dist/*.css',
+        'dist/**/*.css',
       ],
     },
     {
