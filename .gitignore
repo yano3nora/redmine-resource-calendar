@@ -3,7 +3,7 @@
 *.sublime-project
 *.sublime-settings
 *.sublime-workspace
-dist/
+dist/*
 !dist/.keep
 
 ### log tmp chache ###
