@@ -1,6 +1,17 @@
 # redmine-resource-calendar
 Resource calendar component by react.js using Redmine REST API.
 
+## Settings
+```
+$ touch .env
+$ vi .env
+
+> USERS=[{"id":1, "name":"john"}, {"id":2, "name":"jane"}]
+> URL=https://www.example.com/redmine
+> API_KEY=xxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+> WORKLOAD=8
+```
+
 ## Deployment
 ```
 $ git clone -b develop ssh://~.git

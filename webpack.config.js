@@ -5,6 +5,31 @@ const webpack              = require('webpack')
 const autoprefixer         = require('autoprefixer')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const BrowserSyncPlugin    = require('browser-sync-webpack-plugin')
+const HtmlWebpackPlugin    = require('html-webpack-plugin')
+const fs                   = require('fs')
+require('dotenv').config()
+
+/**
+ * generateHtmlPlugins
+ *
+ * Custom plugin for converting multiple template files,
+ * using with html-webpack-plugin.
+ *
+ * @see https://extri.co/2017/07/11/generating-multiple-html-pages-with-htmlwebpackplugin/
+ */
+function generateHtmlPlugins (templateDir) {
+  const templateFiles = fs.readdirSync(path.resolve(__dirname, templateDir))
+  return templateFiles.map(item => {
+    const parts = item.split('.')
+    const name = parts[0]
+    const extension = parts[1]
+    return new HtmlWebpackPlugin({
+      filename: `${name}.html`,
+      template: path.resolve(__dirname, `${templateDir}/${name}.${extension}`)
+    })
+  })
+}
+const htmlPlugins = generateHtmlPlugins('./src/templates')
 
 module.exports = {
   watchOptions: {
@@ -24,7 +49,7 @@ module.exports = {
     ],
   },
   output: {
-    path: path.join(__dirname, 'sample/'),
+    path: path.join(__dirname, 'dist/'),
     filename: '[name].js',
   },
   resolve: {
@@ -109,9 +134,24 @@ module.exports = {
           },
         },
       },
+      {
+        test: /\.ejs$/,
+        use: [
+          'html-loader',
+          'ejs-html-loader',
+        ],
+      },
     ],
   },
   plugins: [
+    new webpack.DefinePlugin({
+      'process.env': {
+        USERS:    JSON.stringify(process.env.USERS),
+        URL:      JSON.stringify(process.env.URL),
+        API_KEY:  JSON.stringify(process.env.API_KEY),
+        WORKLOAD: JSON.stringify(process.env.WORKLOAD),
+      }
+    }),
     new MiniCssExtractPlugin({
       filename: './bundle.css',
     }),
@@ -130,7 +170,7 @@ module.exports = {
       host: 'localhost',
       port: 3000,
       server: {
-        baseDir: './sample',
+        baseDir: './dist',
         index: 'index.html',
       },
       cors: true,
@@ -142,13 +182,13 @@ module.exports = {
         ignored: ['/node_modules/'],  // edit
       },
       files: [  // edit
-        'sample/*.html',
+        'dist/*.html',
         'src/**/*.js',
-        'sample/*.css',
+        'dist/*.css',
       ],
     },
     {
       reload: false,
     }),
-  ],
+  ].concat(htmlPlugins),
 }

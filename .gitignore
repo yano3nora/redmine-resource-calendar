@@ -3,9 +3,8 @@
 *.sublime-project
 *.sublime-settings
 *.sublime-workspace
-sample/bundle.js
-sample/bundle.css
-
+dist/
+!dist/.keep
 
 ### log tmp chache ###
 log/
