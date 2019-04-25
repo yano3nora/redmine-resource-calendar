@@ -42,6 +42,7 @@ module.exports = {
   entry: {
     bundle: [
       './src/index.scss',
+      '@babel/polyfill/noConflict',
       './src/index.js',
       ...glob.sync('./src/bases/**/*.js',      { ignored: './**/_*.js' }),
       ...glob.sync('./src/components/**/*.js', { ignored: './**/_*.js' }),

@@ -21,7 +21,9 @@ export default class RedmineResourceCalendar extends Component {
   }
 
   componentDidMount () {
-    this.setWeeks()
+    setTimeout(() => {
+      this.setWeeks()
+    }, 100)
   }
 
   componentDidUpdate () {
@@ -30,10 +32,13 @@ export default class RedmineResourceCalendar extends Component {
 
   setWeeks () {
     const newWeeks           = []
-    const selectedYear       = this.yearSelectRef.current.value
-    const selectedMonth      = this.monthSelectRef.current.value
+    const selectedYear       = this.yearSelectRef.current && this.yearSelectRef.current.value
+    const selectedMonth      = this.monthSelectRef.current && this.monthSelectRef.current.value
     const firstDayOfMonth    = moment(`${selectedYear}-${selectedMonth}-01`, 'YYYY-MM-DD')
     const firstDayOfCalendar = firstDayOfMonth.add(-firstDayOfMonth.day(), 'days')
+    if (!selectedYear || !selectedMonth) {
+      return false
+    }
     for (let i = 0; i < 6; i++) {
       let adding = 7 * i
       let start  = moment(firstDayOfCalendar.format('YYYY-MM-DD'), 'YYYY-MM-DD').add(adding, 'days')
