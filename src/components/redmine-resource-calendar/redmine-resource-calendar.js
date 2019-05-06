@@ -149,9 +149,9 @@ export default class RedmineResourceCalendar extends Component {
           {(() => {
             return (
               <select ref={this.yearSelectRef} defaultValue={this.state.year}>
-                <option value={this.state.year + 1}>{this.state.year + 1}</option>
+                <option value={Number(this.state.year) + 1}>{Number(this.state.year) + 1}</option>
                 <option value={this.state.year}>{this.state.year}</option>
-                <option value={this.state.year - 1}>{this.state.year - 1}</option>
+                <option value={Number(this.state.year) - 1}>{Number(this.state.year) - 1}</option>
               </select>
             )
           })()}
@@ -160,7 +160,6 @@ export default class RedmineResourceCalendar extends Component {
           </select>
           <button onClick={this.setWeeks}>Reload</button>
         </div>
-        <hr />
         <table className="redmine-resource-calendar-table">
           <thead>
             <tr>
@@ -178,30 +177,42 @@ export default class RedmineResourceCalendar extends Component {
                     {week.end.format('D')}
                   </td>
                   {week.users.map((user) => {
+                    let plansPercent = Math.round((user.issues.reduce((a, b) => a + b.workload, 0)) / (this.props.workload * 5) * 100)
+                    let plansHour    = Math.round(user.issues.reduce((a, b) => a + b.workload, 0) * 10) / 10
+                    let plansStatus  = 'low'
+                    if (plansPercent > 99) {
+                      plansStatus = 'high'
+                    } else if (plansPercent > 50) {
+                      plansStatus = 'middle'
+                    }
+                    let actsPercent  = Math.round((user.spents.reduce((a, b) => a + b.hours, 0)) / (this.props.workload * 5) * 100)
+                    let actsHour     = Math.round(user.spents.reduce((a, b) => a + b.hours, 0) * 10) / 10
+                    let actsStatus   = 'low'
+                    if (actsPercent > 99) {
+                      actsStatus = 'high'
+                    } else if (actsPercent > 50) {
+                      actsStatus = 'middle'
+                    }
                     return (
-                      <td key={user.userId}>
-                        <div className="redmine-resource-calendar-user-field">
+                      <td key={user.userId} className="redmine-resource-calendar-user-field">
+                        <div className="redmine-resource-calendar-user-field__inner">
                           <div className="redmine-resource-calendar-resources">
-                            <div className="redmine-resource-calendar-plans">
+                            <div className={`redmine-resource-calendar-plans redmine-resource-calendar--${plansStatus}`}>
                               <span className="redmine-resource-calendar-percent">
-                                {
-                                  Math.round((user.issues.reduce((a, b) => a + b.workload, 0)) / (this.props.workload * 5) * 100)
-                                }
+                                {plansPercent}
                               </span>
                               <small className="redmine-resource-calendar-hours">
-                                {Math.round(user.issues.reduce((a, b) => a + b.workload, 0) * 10) / 10}
+                                {plansHour}
                                 /
                                 {this.props.workload * 5}
                               </small>
                             </div>
-                            <div className="redmine-resource-calendar-acts">
+                            <div className={`redmine-resource-calendar-acts redmine-resource-calendar--${actsStatus}`}>
                               <span className="redmine-resource-calendar-percent">
-                                {
-                                  Math.round((user.spents.reduce((a, b) => a + b.hours, 0)) / (this.props.workload * 5) * 100)
-                                }
+                                {actsPercent}
                               </span>
                               <small className="redmine-resource-calendar-hours">
-                                {Math.round(user.spents.reduce((a, b) => a + b.hours, 0) * 10) / 10}
+                                {actsHour}
                                 /
                                 {this.props.workload * 5}
                               </small>
